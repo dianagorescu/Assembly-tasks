@@ -24,17 +24,17 @@ sort_procs:
 while_1:
     xor ebx, ebx
     xor ecx, ecx
-    mov ebx, 0 ;; contor pt existenta unui swap
+    mov ebx, 0                         ;; semafor pt existenta unui swap
 
-    mov eax, [ebp + 12] ;; initializez lungime
+    mov eax, [ebp + 12]                ;; initializez lungimea
     xor edi, edi
-    mov edi, 0 ;; iterator prin vector
+    mov edi, 0                         ;; iterator prin vector
 
     xor esi, esi
-    mov esi, eax ;; folosesc registrul esi pt lungime
-    xor eax, eax ;; golesc eax pt a lucra mai departe cu el
+    mov esi, eax                       ;; mut lungimea in registrul esi
+    xor eax, eax                       ;; golesc eax pt a lucra mai departe cu el
 
-    sub esi, 1 ;; sunt posibile lungime - 1 swap-uri
+    sub esi, 1                         ;; sunt posibile lungime - 1 swap-uri
     
 
 while_2:
@@ -42,10 +42,11 @@ while_2:
     mov al, [edx + edi + 5 + proc.prio]
 
     cmp cl, al
-    jl no_prob ;; daca termenii sunt in ordine cresc => nu exista probleme
-    je case_time ;; daca termenii au aceeasi prioritate, verificam timpul
+    jl no_prob                         ;; daca termenii sunt in ordine cresc => nu exista probleme
+    je case_time                       ;; daca termenii au aceeasi prioritate, verificam timpul
 
     swap:
+
     ;; interschimb toate campurile structurii
 
     mov cl, [edx + edi + proc.prio]
@@ -60,7 +61,7 @@ while_2:
     mov [edx + edi + proc.time], cx
     mov [edx + edi + 5 + proc.time], ax
 
-    xor ecx, ecx
+    xor ecx, ecx                       ;; golesc registrele pt a nu avea reziduri
     xor eax, eax
 
     mov cx, [edx + edi + proc.pid]
@@ -69,9 +70,8 @@ while_2:
     mov [edx + edi + proc.pid], cx
     mov [edx + edi + 5 + proc.pid], ax
 
-    mov ebx, 1 ;; cresc contorul daca s-a produs vreun swap
-
-    jmp no_prob ;; nu mai este nevoie sa verific alte cazuri
+    mov ebx, 1                         ;; semnalez semaforul ca s-a produs swap
+    jmp no_prob                        ;; nu mai este nevoie sa verific alte cazuri
 
     case_time:
     mov cx, [edx + edi + proc.time]
@@ -81,7 +81,8 @@ while_2:
     jl no_prob
     jg swap
 
-    ;; ajunge aici daca termenii au si campul timp la fel
+    ;; ajunge aici cand termenii au si campul timp este identic => verificam pid
+
     xor ecx, ecx
     xor eax, eax
     mov cx, [edx + edi + proc.pid]
@@ -92,12 +93,12 @@ while_2:
     jg swap
     
     no_prob:
-    add edi, 5 ;; structura are 5 octeti
-    sub esi, 1 ;; iteram prin vector
+    add edi, 5                         ;; structura are 5 octeti
+    sub esi, 1                         ;; iteram prin vector
     jnz while_2
 
-    cmp ebx, 1 ;; s-a produs minim un swap
-    je while_1 ;; e necesar sa parcurg inca o data
+    cmp ebx, 1                         ;; s-a produs minim un swap si
+    je while_1                         ;; e necesar sa parcurg inca o data
 
     ;; Your code ends here
     
